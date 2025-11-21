@@ -1,0 +1,2 @@
+rootProject.name = "Android Remote Camera"
+include ':app'
