@@ -105,25 +105,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void toggleStreaming() {
-        isStreaming = !isStreaming;
         if (isStreaming) {
-            startStreaming();
-        } else {
+            isStreaming = false;
             stopStreaming();
+        } else {
+            if (startStreaming()) {
+                isStreaming = true;
+            }
         }
     }
 
-    private void startStreaming() {
+    private boolean startStreaming() {
         if (streamingManager.startStreaming()) {
             statusText.setText(R.string.status_streaming);
             statusText.setTextColor(ContextCompat.getColor(this, R.color.status_streaming));
             streamButton.setImageResource(android.R.drawable.ic_media_pause);
             Toast.makeText(this, "Streaming started to " + networkManager.getServerAddress(), 
                     Toast.LENGTH_SHORT).show();
+            return true;
         } else {
             Toast.makeText(this, "Failed to start streaming. Check network connection.", 
                     Toast.LENGTH_SHORT).show();
-            isStreaming = false;
+            return false;
         }
     }
 

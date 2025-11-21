@@ -69,6 +69,16 @@ public class NetworkManager {
     }
 
     /**
+     * Get password for authentication
+     * Note: Password is stored in plaintext (insecure, TODO: implement encryption)
+     * This method should only be used for establishing secure connections
+     */
+    public String getPassword() {
+        // TODO: Decrypt password using Android Keystore
+        return prefs.getString("password", "");
+    }
+
+    /**
      * Check if audio is enabled
      */
     public boolean isAudioEnabled() {

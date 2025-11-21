@@ -85,6 +85,8 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putString("server_address", serverAddress);
         editor.putInt("server_port", serverPort);
         editor.putString("username", username);
+        // WARNING: Storing password in plaintext is insecure
+        // TODO: Implement encryption using Android Keystore or EncryptedSharedPreferences
         editor.putString("password", password);
         editor.putString("device_name", deviceName);
         editor.putBoolean("audio_enabled", audioSwitch.isChecked());
