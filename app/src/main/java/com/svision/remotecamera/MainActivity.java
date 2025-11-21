@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
     private boolean isStreaming = false;
     private ProcessCameraProvider cameraProvider;
+    private StreamingManager streamingManager;
+    private NetworkManager networkManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initializeViews();
+        initializeManagers();
         setupListeners();
 
         if (allPermissionsGranted()) {
@@ -63,6 +66,12 @@ public class MainActivity extends AppCompatActivity {
         switchCameraButton = findViewById(R.id.switchCameraButton);
         captureButton = findViewById(R.id.captureButton);
         settingsButton = findViewById(R.id.settingsButton);
+    }
+
+    private void initializeManagers() {
+        streamingManager = new StreamingManager(this);
+        networkManager = new NetworkManager(this);
+        updateStatus();
     }
 
     private void setupListeners() {
@@ -105,17 +114,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startStreaming() {
-        statusText.setText(R.string.status_streaming);
-        statusText.setTextColor(ContextCompat.getColor(this, R.color.status_streaming));
-        streamButton.setImageResource(android.R.drawable.ic_media_pause);
-        Toast.makeText(this, "Streaming started", Toast.LENGTH_SHORT).show();
+        if (streamingManager.startStreaming()) {
+            statusText.setText(R.string.status_streaming);
+            statusText.setTextColor(ContextCompat.getColor(this, R.color.status_streaming));
+            streamButton.setImageResource(android.R.drawable.ic_media_pause);
+            Toast.makeText(this, "Streaming started to " + networkManager.getServerAddress(), 
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Failed to start streaming. Check network connection.", 
+                    Toast.LENGTH_SHORT).show();
+            isStreaming = false;
+        }
     }
 
     private void stopStreaming() {
+        streamingManager.stopStreaming();
         statusText.setText(R.string.status_connected);
         statusText.setTextColor(ContextCompat.getColor(this, R.color.status_connected));
         streamButton.setImageResource(android.R.drawable.ic_media_play);
         Toast.makeText(this, "Streaming stopped", Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateStatus() {
+        if (networkManager.isNetworkAvailable()) {
+            statusText.setText(String.format("Ready - %s", networkManager.getNetworkType()));
+            statusText.setTextColor(ContextCompat.getColor(this, R.color.status_connected));
+        } else {
+            statusText.setText(R.string.status_disconnected);
+            statusText.setTextColor(ContextCompat.getColor(this, R.color.status_disconnected));
+        }
     }
 
     private void switchCamera() {
@@ -133,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void capturePhoto() {
+        streamingManager.captureSnapshot();
         Toast.makeText(this, "Photo captured", Toast.LENGTH_SHORT).show();
     }
 
